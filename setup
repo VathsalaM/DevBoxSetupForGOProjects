@@ -1,0 +1,113 @@
+#!/usr/bin/env ruby
+require 'net/http'
+require 'json'
+require 'fileutils'
+
+def main()
+
+  config_file_name = ARGV[0]
+
+  # return if no config present
+  if config_file_name.nil?
+    p 'no config specified'
+    return
+  end
+
+
+
+  conf = readJson(config_file_name)
+  git_name = conf['git_name']
+
+  current_dir = Dir.getwd
+  # set environment
+  working_dir = "Workspace_sample"
+  setDirs(working_dir)
+  toolsInstallation(conf['tools'],current_dir+'/'+conf['tools_file'])
+
+  conf['git_orgs'].each do |org|
+    org_name = org.strip
+    makeAndCDToPath(org_name)
+
+    repos = readRepos(git_name,org_name,conf['access_token'])
+
+    services = []
+    assets = []
+
+    setupRepoIndex = repos.find_index {|repo| repo['name'] == conf['org_config_repo_name']}
+
+    #  read org config if present
+    if setupRepoIndex >= 0
+      repo_name = repos[setupRepoIndex]['name']
+
+      `git clone git@#{git_name}:#{org_name}/#{repo_name}.git`
+
+      Dir.chdir repo_name
+      conf = readJson(conf['org_config_file_name'])
+      services = conf['services']
+      assets = conf['assets']
+      repos.delete(repo_name)
+    end
+
+    repos.each do |repo|
+
+      repo_name = repo['name']
+      `git clone git@#{git_name}:#{org_name}/#{repo_name}.git`
+
+      Dir.chdir repo_name
+
+      #  perform special task is it is a service or an assets repo
+      if assets.include? repo_name
+        `npm install`
+        `gulp build`
+      elsif services.include? repo_name
+        `glide install`
+        `make build`
+      end
+
+      Dir.chdir File.expand_path("..", Dir.pwd)
+
+    end
+  end
+end
+
+def installTool(cmdList)
+  cmdList.each do |command|
+    `#{command}`
+  end
+end
+
+def toolsInstallation(toolsList,fileName)
+  unless toolsList.kind_of?(Array) && !toolsList.nil?
+    return
+  end
+  tools = readJson(fileName)
+  toolsList.each do |toolName|
+    installTool(tools[toolName])
+  end
+end
+
+def readJson(fileName)
+  file = File.read(fileName)
+  return JSON.parse(file)
+end
+
+def makeAndCDToPath(filePath)
+  FileUtils.mkpath filePath
+  Dir.chdir filePath
+end
+
+def setDirs(working_directory)
+  Dir.chdir Dir.home
+  workspace_path = Dir.home+"/#{working_directory}/src/git.periscope.com/"
+  makeAndCDToPath(workspace_path)
+end
+
+def readRepos(git_name,org_name,access_token)
+  url = "http://#{git_name}/api/v3/orgs/#{org_name}/repos?access_token=#{access_token}"
+  uri = URI(url)
+  response = Net::HTTP.get(uri)
+  return JSON.parse(response)
+end
+
+
+main()

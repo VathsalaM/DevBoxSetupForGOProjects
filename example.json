@@ -1,0 +1,9 @@
+{
+  "git_name": "git_name",
+  "access_token": "access token from git",
+  "git_orgs": ["org_name1","org_name2"],
+  "org_config_repo_name": "repo sitory name that contains config file",
+  "org_config_file_name": "config file name",
+  "tools_file": "file to find tools",
+  "tools": ["tool_name1","tool_name2"]
+}

@@ -1,0 +1,38 @@
+{
+  "go": [
+    "echo export GOPATH=$HOME/Workspace_sample >> ~/.bashrc",
+    "echo export GOROOT=/usr/local/opt/go/libexec >> ~/.bashrc",
+    "echo export PATH=$PATH:$GOPATH/bin >> ~/.bashrc",
+    "echo export PATH=$PATH:$GOROOT/bin >> ~/.bashrc",
+    "echo export GOPATH=$HOME/Workspace_sample >> ~/.zshrc",
+    "echo export GOROOT=/usr/local/opt/go/libexec >> ~/.zshrc",
+    "echo export PATH=$PATH:$GOPATH/bin >> ~/.zshrc",
+    "echo export PATH=$PATH:$GOROOT/bin >> ~/.zshrc",
+    "source ~/.bashrc",
+    "source ~/.zshrc",
+    "brew install go",
+    "go get golang.org/x/tools/cmd/godoc",
+    "go get golang.org/x/tools/cmd/vet"
+  ],
+  "gcc": [
+    "xcode-select --install",
+    "brew install gcc"
+  ],
+  "ruby": [
+    "brew install ruby"
+  ],
+  "vagrant": [
+    "brew cask install vagrant",
+    "brew cask install vagrant-manager",
+    "gem install vagrant-vbguest"
+  ],
+  "virtualbox": [
+    "brew cask install virtualbox"
+  ],
+  "chef": [
+    "brew cask install chefdk"
+  ],
+  "test_kitchen": [
+    "gem install test-kitchen"
+  ]
+}
